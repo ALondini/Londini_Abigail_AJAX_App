@@ -1,109 +1,110 @@
 (() => {
 
     //variables
-    const hotspots = document.querySelectorAll(".Hotspot");
-    const materialTemplate = document.querySelector("#material-template");
-    const materialList = document.querySelector("#material-list");
+    const hotspots = document.querySelectorAll(".hotspot");
+    const material_template = document.querySelector("#material_template");
+    const material_list = document.querySelector("#material_list");
+    const material_loader = document.querySelector("#material_loader");
 
-    //This information needs to be removed then pulled with an AJAX Call using the Fetch API
-    //this is the api url https://swiftpixel.com/earbud/api/materials"
+    const info_box_template = document.querySelector("#info_box_template"); // Add this in HTML
+    const info_box_container = document.querySelector("#info_box_container");
+    const info_loader = document.querySelector("#info_loader");
 
-    const materialListData = [
-        {
-            heading: "Precision-Crafted Polymers",
-            description: "Our earbuds are meticulously molded from high-quality plastics, ensuring a blend of elegance, comfort, and resilience that's second to none."
-        },
-        {
-            heading: "Luxurious Silicone Harmony",
-            description: "Our uniquely engineered ear tips are cocooned in plush silicone, delivering an opulent embrace for your ears, ensuring an unrivaled fit and exquisite audio experience."
-        },
-        {
-            heading: "Rubberized Cables",
-            description: "Experience the unparalleled freedom of movement with our flexible rubber cables that promise durability without compromise."
-        },
-        {
-            heading: "Enhanced Comfort Sensors",
-            description: "A touch of magic in the form of built-in microphones and sensors empowers your earbuds to obey your every command, making your audio journey seamless and enchanting."
-        },
-        {
-            heading: "Artistic Mesh Guard",
-            description: "Shielded by artful mesh screens, our speakers remain untarnished, keeping your listening experience pristine."
-        }
-    ];
 
     //functions
-    function loadInfoBoxes() {
+    function load_info_boxes() {
+        if (info_loader) info_loader.style.display = "block";
 
         fetch("https://swiftpixel.com/earbud/api/infoboxes")
             .then(response => response.json())
-            .then(infoBoxes => {
-                console.log(infoBoxes);
+            .then(info_boxes => {
+                if (info_loader) info_loader.style.display = "none";
 
-                infoBoxes.forEach((infoBox, index) => {
+                console.log(info_boxes);
+
+                info_boxes.forEach((info_box, index) => {
                     let selected = document.querySelector(`#hotspot-${index + 1}`);
+                    if (!selected) return;
 
-                    const titleElement = document.createElement('h2');
-                    titleElement.textContent = infoBox.heading;
+                    const title_element = document.createElement('h2');
+                    title_element.textContent = info_box.heading;
 
-                    const textElement = document.createElement('p');
-                    textElement.textContent = infoBox.description;
+                    const text_element = document.createElement('p');
+                    text_element.textContent = info_box.description;
 
-                    selected.appendChild(titleElement);
-                    selected.appendChild(textElement);
+                    selected.appendChild(title_element);
+                    selected.appendChild(text_element);
+                });
+            })
+
+            .catch(error => {
+                console.log(error);
+                if (info_box_container) {
+                    const error_message = document.createElement("p");
+                    error_message.textContent = "Oops, something went wrong. It may be your internet connection or it may be a problem with us. Sorry, please try again later.";
+                    info_box_container.appendChild(error_message);
+                }
+            });
+    }
+    load_info_boxes();
+
+    function load_material_info() {
+
+        if (material_loader) material_loader.style.display = "block";
+
+        fetch("https://swiftpixel.com/earbud/api/materials")
+            .then(response => response.json())
+            .then(materials => {
+                if (material_loader) material_loader.style.display = "none";
+
+                console.log(materials);
+
+                if (!material_template || !material_list) return;
+
+                materials.forEach(material => {
+                    // clone the template li with h3 and p inside
+                    const clone = material_template.content.cloneNode(true);
+                    // populate the cloned template
+                    const material_heading = clone.querySelector(".material-heading");
+                    material_heading.textContent = material.heading;
+
+                    const material_description = clone.querySelector(".material_description");
+                    material_description.textContent = material.description;
+
+                    //Hide the loader
+
+                    //Append the populated template to the list
+                    material_list.appendChild(clone);
                 });
             })
             .catch(error => {
-                //make a meaningful error message and post to DOM
                 console.log(error);
+                if (material_list) {
+                    const error_message = document.createElement("p");
+                    error_message.textContent = "Oops, something went wrong. Please try again later.";
+                    material_list.appendChild(error_message);
+                }
+                if (material_loader) material_loader.style.display = "none";
             });
-
-
     }
-    loadInfoBoxes();
-
-    function loadMaterialInfo() {
-
-        //Add loader in HTML, write code to show it here
-
-        //make AJAX Call here
-
-        //this is the api url https://swiftpixel.com/earbud/api/materials"
+    load_material_info();
 
 
-        materialListData.forEach(material => {
-            // clone the template li with h3 and p inside
-            const clone = materialTemplate.content.cloneNode(true);
-            // populate the cloned template
-            const materialHeading = clone.querySelector(".material-heading");
-            materialHeading.textContent = material.heading;
-
-            const materialDescription = clone.querySelector(".material-description");
-            materialDescription.textContent = material.description;
-
-            //Hide the loader
-
-            //Append the populated template to the list
-            materialList.appendChild(clone);
-        })
-    }
-    loadMaterialInfo();
-
-
-    function showInfo() {
-        let selected = document.querySelector(`#${this.slot}`);
-        gsap.to(selected, 1, { autoAlpha: 1 });
+    function show_info() {
+        let selected = document.querySelector(`#${this.dataset.slot}`);
+        if (selected) gsap.to(selected, { autoAlpha: 1, duration: 1 });
     }
 
-    function hideInfo() {
-        let selected = document.querySelector(`#${this.slot}`);
-        gsap.to(selected, 1, { autoAlpha: 0 });
+    function hide_info() {
+        let selected = document.querySelector(`#${this.dataset.slot}`);
+        if (selected) gsap.to(selected, { autoAlpha: 0, duration: 1 });
     }
 
     //Event listeners
 
     hotspots.forEach(function (hotspot) {
-        hotspot.addEventListener("mouseenter", showInfo);
-        hotspot.addEventListener("mouseleave", hideInfo);
+        hotspot.addEventListener("mouseenter", show_info);
+        hotspot.addEventListener("mouseleave", hide_info);
     });
 
 })();
