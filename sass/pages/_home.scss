@@ -1,0 +1,7 @@
+.home-page-wrapper {
+  padding-top: 50px;
+
+  @include respond(tablet) {
+    padding-top: 80px;
+  }
+}

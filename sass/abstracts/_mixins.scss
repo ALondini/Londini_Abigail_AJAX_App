@@ -48,3 +48,20 @@
       url("#{$file-path}.woff2") format("woff2");
   }
 }
+
+// Media Query Mixin
+@mixin respond($size) {
+  @if $size == mobile {
+    @media (max-width: #{$tablet - 1}) {
+      @content;
+    }
+  } @else if $size == tablet {
+    @media (min-width: #{$tablet}) and (max-width: #{$desktop - 1}) {
+      @content;
+    }
+  } @else if $size == desktop {
+    @media (min-width: #{$desktop}) {
+      @content;
+    }
+  }
+}
